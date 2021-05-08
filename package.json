@@ -1,0 +1,29 @@
+{
+  "name": "emoji-chess-telegram-bot",
+  "version": "1.0.0",
+  "description": "Emoji Chess Bot in Telegram t.me/EmojiChessBot",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./api/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dementeey/emoji-chess-telegram-bot.git"
+  },
+  "keywords": [
+    "Chess",
+    "emoji",
+    "telegram",
+    "bot"
+  ],
+  "author": "Anton Loiko",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Dementeey/emoji-chess-telegram-bot/issues"
+  },
+  "homepage": "https://github.com/Dementeey/emoji-chess-telegram-bot#readme",
+  "dependencies": {
+    "telegraf": "4.3.0"
+  }
+}
