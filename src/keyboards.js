@@ -1,19 +1,23 @@
 const { Markup } = require('telegraf')
 
 const commands = {
-  random: '🎲 Random',
-  white: '⚪ White',
-  black: '⚫️ Black',
-  stop: '🛑 Stop',
-  start: '/start',
+  random: '🎲 Рандом',
+  white: '⚪ Белый',
+  black: '⚫️ Черные',
+  stop: '🛑 Завершить игру',
+  start: '♟ Начать игру',
+  rules: '❓ Правила',
 }
 
-const keyboardAfterStop = Markup.keyboard([commands.start])
-const keyboardAfterStart = Markup.keyboard([commands.stop])
+const keyboardAfterStop = Markup.keyboard([[commands.start]]).resize()
+const keyboardAfterStart = Markup.keyboard([
+  [commands.rules],
+  [commands.stop],
+]).resize()
 const keyboardStart = Markup.keyboard([
   [commands.black, commands.white, commands.random],
 ])
-  .oneTime(true)
+  .oneTime()
   .resize()
 
 module.exports = {
