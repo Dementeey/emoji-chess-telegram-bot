@@ -16,6 +16,8 @@ const keyboardAfterStart = Markup.keyboard([
 ]).resize()
 const keyboardStart = Markup.keyboard([
   [commands.black, commands.white, commands.random],
+  [commands.rules],
+  [commands.stop],
 ])
   .oneTime()
   .resize()

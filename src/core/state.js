@@ -1,50 +1,96 @@
+const { FIGURE_BLACK_COLOR, FIGURE_WHITE_COLOR } = require('./figures')
+const { moveFigureReg } = require('./../utils')
 class State {
-  constructor() {}
-  _state = {
-    white: true,
-    black: false,
-    isGameStarted: false,
-    messageId: null,
-  }
+  #color = FIGURE_WHITE_COLOR
+  #isGameStarted = false
+  #messageIdWithBoard = null
 
-  _setState(name, value) {
-    this._state = {
-      ...this._state,
-      [name]: value,
+  #isFirstMoveIsMade = false
+  #game = null
+
+  constructor(game) {
+    if (!game) {
+      throw new Error('The constructor parameters are required')
     }
+    this.#game = game
   }
 
-  get state() {
-    return this._state
+  get board() {
+    return this.#game.board
   }
 
-  startGame(messageId) {
-    if (this._state.isGameStarted) {
+  get messageIdWithBoard() {
+    return this.#messageIdWithBoard
+  }
+
+  set messageIdWithBoard(messageId) {
+    if (!messageId) {
+      return false
+    }
+
+    this.#messageIdWithBoard = messageId
+    return true
+  }
+
+  get color() {
+    return this.#color
+  }
+
+  get isGameStarted() {
+    return this.#isGameStarted
+  }
+
+  get isFirstMoveIsMade() {
+    return this.#isFirstMoveIsMade
+  }
+
+  startGame() {
+    if (this.#isGameStarted) {
       console.error(new Error('The game has already started!'))
+      return false
     }
-
-    this._setState('isGameStarted', true)
-    this._setState('messageId', messageId)
+    console.log(this.#color, '<=== this.#color ===')
+    this.#isGameStarted = true
+    return this.#game.start(this.#color)
   }
 
   endGame() {
-    if (!this._state.isGameStarted) {
+    if (!this.#isGameStarted) {
       console.error(new Error('The game is already over!'))
+      return false
     }
 
-    this._setState('isGameStarted', false)
+    this.#isGameStarted = false
+    this.#game.end()
+    return true
   }
 
   reshapeColor() {
-    if (this._state.isGameStarted) {
+    if (this.#isGameStarted) {
       console.error(new Error('The game has already started!'))
+      return false
     }
 
-    const oldBlackColor = this._state.black
-    const oldWhiteColor = this._state.white
+    const isColorBlack = this.#color === FIGURE_BLACK_COLOR
 
-    this._setState('white', oldBlackColor)
-    this._setState('black', oldWhiteColor)
+    this.#color = isColorBlack ? FIGURE_WHITE_COLOR : FIGURE_BLACK_COLOR
+    return true
+  }
+
+  movePiece(message = '') {
+    if (!moveFigureReg.test(message)) {
+      return null
+    }
+
+    const [from, to] = message.split('=>')
+
+    // Move the E2 pawn to E4
+    // this.#game.movePiece({
+    //   from: { file: 5, rank: 2 },
+    //   to: { file: 5, rank: 4 },
+    // })
+
+    return this.#game.moveFigure()
   }
 }
 

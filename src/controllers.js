@@ -1,11 +1,13 @@
+const { Markup } = require('telegraf')
+
 const { state } = require('./core')
+const { FIGURE_WHITE_COLOR, FIGURE_BLACK_COLOR } = require('./core/figures')
 const {
   keyboardAfterStart,
   keyboardStart,
   keyboardAfterStop,
 } = require('./keyboards')
 const { moveFigureReg, getRandom } = require('./utils')
-const { getBoard } = require('./board')
 
 const handleStartButton = (ctx) =>
   ctx.reply('Привет! Выбирай цвет фигур!', keyboardStart)
@@ -16,51 +18,88 @@ const handleStopButton = async (ctx) => {
   await ctx.reply('Game stopped', keyboardAfterStop)
 }
 const handleBlackButton = async (ctx) => {
-  if (state.state.white) {
-    state.reshapeColor()
-  }
+  try {
+    if (state.color !== FIGURE_BLACK_COLOR) {
+      state.reshapeColor()
+    }
 
-  const { message_id } = await ctx.reply(getBoard(), keyboardAfterStart)
-  state.startGame(message_id)
+    const { message_id } = await ctx.reply(
+      state.startGame(),
+      keyboardAfterStart,
+    )
+
+    state.messageIdWithBoard(message_id)
+  } catch (err) {
+    state.endGame()
+    console.error(err, '<=== handleBlackButton ===')
+  }
 }
-
 const handleWhiteButton = async (ctx) => {
-  if (state.state.black) {
-    state.reshapeColor()
-  }
+  try {
+    if (state.color !== FIGURE_WHITE_COLOR) {
+      state.reshapeColor()
+    }
 
-  const { message_id } = await ctx.reply(getBoard(), keyboardAfterStart)
-  state.startGame(message_id)
+    const { message_id } = await ctx.reply(
+      state.startGame(),
+      keyboardAfterStart,
+    )
+    state.messageIdWithBoard(message_id)
+  } catch (err) {
+    state.endGame()
+    console.error(err, '<=== handleWhiteButton ===')
+  }
 }
 const handleRandomButton = async (ctx) => {
-  if (getRandom(1, 3) === 2) {
-    state.reshapeColor()
-  }
+  try {
+    if (getRandom(1, 3) === 2) {
+      state.reshapeColor()
+    }
 
-  const { message_id } = await ctx.reply(getBoard(), keyboardAfterStart)
-  state.startGame(message_id)
+    const { message_id } = await ctx.reply(
+      state.startGame(),
+      keyboardAfterStart,
+    )
+
+    state.messageIdWithBoard(message_id)
+  } catch (err) {
+    state.endGame()
+    console.error(err, '<=== handleRandomButton ===')
+  }
 }
 const handleRulesButton = async (ctx) => {
-  await ctx.reply(
-    `Правила такие:
-1: ок
-2: ок`,
+  await ctx.replyWithMarkdown(
+    `
+    Правила шахмат построены по правилам "ФИДЕ".
+    Детальнее [тут](http://chess.sainfo.ru/lawsr.html)
+
+    Правила игры с ботом такие:
+1: Нажимаем старт, предоставляется выбор цвета фигур.
+2: Делаем ход, вводим в поле ввода номер:
+  <клетки фигуры которой будем ходить>=><куда будем ходить>.
+  Обязательно латинскими буквами.
+  Например: G2=>G4
+  `,
   )
 }
 
 const handleMessage = async (ctx) => {
-  if (!state.state.isGameStarted) {
+  if (!state.isGameStarted) {
     await ctx.deleteMessage(ctx.update.message.message_id)
     return
   }
 
-  if (!moveFigureReg.test(ctx.update.message.text)) {
-    await ctx.deleteMessage(ctx.update.message.message_id)
-    return await ctx.reply(`Сделайте пожалуйста ваш ход, например: G2=>G4`)
+  if (state.color !== FIGURE_WHITE_COLOR && !state.isFirstMoveIsMade) {
+    return await ctx.reply(`НАРУШЕНИЕ ПРАВИЛ. Первыми ходят белые!`)
   }
 
-  await ctx.deleteMessage(state.state.messageId)
-  await ctx.reply(getBoard())
+  if (!moveFigureReg.test(ctx.update.message.text)) {
+    await ctx.deleteMessage(ctx.update.message.message_id)
+    return await ctx.reply(`Сделайте пожалуйста ваш ход. Например: G2=>G4`)
+  }
+
+  await ctx.deleteMessage(state.messageId)
+  await ctx.reply(state.movePiece(ctx.update.message.text))
 }
 
 module.exports = {
